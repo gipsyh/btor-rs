@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 logic-form = { path = "../logic-form" }
+num-bigint = "0.4.5"
+num-traits = "0.2.19"
 strum = { version = "0.26.2", features = ["derive"] }
