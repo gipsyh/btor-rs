@@ -1,4 +1,4 @@
-use logic_form::fol::{BiOpType, Sort, Term, UniOpType};
+use logic_form::fol::{BiOpType, ExtOpType, Sort, Term, TriOpType, UniOpType};
 use num_bigint::BigInt;
 use num_traits::Num;
 use std::{collections::HashMap, path::Path};
@@ -58,6 +58,12 @@ impl Parser {
                     let sort = parse_sort(split);
                     assert!(self.sorts.insert(id, sort).is_none());
                 }
+                "input" => {
+                    let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
+                    let v = Term::new_var(sort);
+                    input.push(v.clone());
+                    self.nodes.insert(id, v);
+                }
                 "state" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     let v = Term::new_var(sort);
@@ -111,7 +117,6 @@ impl Parser {
             while (c.len() as u32) < w {
                 c.push(false);
             }
-            dbg!(&c);
             return Term::bv_const(&c);
         }
 
@@ -123,9 +128,24 @@ impl Parser {
 
         if let Ok(ty) = BiOpType::try_from(second) {
             let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
-            let a = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+            let a = self.nodes.get(&parse_id(&mut split)).unwrap();
             let b = self.nodes.get(&parse_id(&mut split)).unwrap();
             return a.biop(b, ty);
+        }
+
+        if let Ok(ty) = TriOpType::try_from(second) {
+            let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
+            let a = self.nodes.get(&parse_id(&mut split)).unwrap();
+            let b = self.nodes.get(&parse_id(&mut split)).unwrap();
+            let c = self.nodes.get(&parse_id(&mut split)).unwrap();
+            return a.triop(b, c, ty);
+        }
+
+        if let Ok(ty) = ExtOpType::try_from(second) {
+            let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
+            let a = self.nodes.get(&parse_id(&mut split)).unwrap();
+            let length: u32 = split.next().unwrap().parse().unwrap();
+            return a.extop(ty, length);
         }
         todo!()
     }
