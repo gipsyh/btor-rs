@@ -82,6 +82,9 @@ impl Parser {
                     let value = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
                     next.insert(state, value);
                 }
+                "output" => {
+                    let o = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                }
                 "bad" => {
                     let b = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
                     bad = bad.and(&b);
@@ -146,6 +149,14 @@ impl Parser {
             let a = self.nodes.get(&parse_id(&mut split)).unwrap();
             let length: u32 = split.next().unwrap().parse().unwrap();
             return a.extop(ty, length);
+        }
+
+        if second == "slice" {
+            let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
+            let a = self.nodes.get(&parse_id(&mut split)).unwrap();
+            let upper: u32 = split.next().unwrap().parse().unwrap();
+            let lower: u32 = split.next().unwrap().parse().unwrap();
+            return a.slice(upper, lower);
         }
         todo!()
     }
