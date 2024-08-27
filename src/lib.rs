@@ -1,14 +1,15 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use aig::Aig;
+use std::{
+    ffi::{c_char, CString},
+    os::raw::c_void,
+};
+
+extern "C" {
+    fn btor2aiger(filename: *const c_char) -> *mut c_void;
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn btor_to_aiger(f: &str) -> Aig {
+    let f = CString::new(f).unwrap();
+    let aiger = unsafe { btor2aiger(f.as_ptr()) };
+    Aig::from_aiger(aiger)
 }
