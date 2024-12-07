@@ -2,6 +2,11 @@
 name = "btor"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Rust wrapper for btor"
+repository = "https://github.com/gipsyh/btor-rs"
+authors = ["Yuheng Su <gipsyh.icu@gmail.com>"]
+
 
 [dependencies]
-aig = { path = "../aig-rs" }
+aig = { path = "../aig-rs", version = "0.2" }
