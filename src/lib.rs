@@ -13,6 +13,7 @@ pub struct Btor {
     pub init: HashMap<Term, Term>,
     pub next: HashMap<Term, Term>,
     pub bad: Vec<Term>,
+    pub constraint: Vec<Term>,
 }
 
 impl Btor {
@@ -146,6 +147,7 @@ impl Parser {
             init,
             next,
             bad,
+            constraint,
         }
     }
 
