@@ -1,4 +1,4 @@
-use logic_form::fol::{
+use fol::{
     op::{self, DynOp},
     Sort, Term,
 };
