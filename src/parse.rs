@@ -1,11 +1,11 @@
+use crate::Btor;
 use fol::{
     op::{self, DynOp},
-    Sort, Term,
+    Sort, Term, TermManager,
 };
 use num_bigint::BigInt;
 use num_traits::Num;
 use std::{collections::HashMap, path::Path};
-use crate::Btor;
 
 impl Btor {
     pub fn parse(s: &str) -> Self {
@@ -56,6 +56,7 @@ impl Parser {
         let mut output = Vec::new();
         let mut bad = Vec::new();
         let mut constraint = Vec::new();
+        let mut tm = TermManager::new();
         for line in s.lines() {
             dbg!(line);
             if line.starts_with(';') {
@@ -74,13 +75,13 @@ impl Parser {
                 }
                 "input" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let v = Term::new_var(sort, id);
+                    let v = tm.new_var(sort);
                     input.push(v.clone());
                     assert!(self.nodes.insert(id, v).is_none());
                 }
                 "state" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let v = Term::new_var(sort, id);
+                    let v = tm.new_var(sort);
                     latch.push(v.clone());
                     assert!(self.nodes.insert(id, v).is_none());
                 }
@@ -124,10 +125,10 @@ impl Parser {
                     while (c.len() as u32) < w {
                         c.push(false);
                     }
-                    assert!(self.nodes.insert(id, Term::bv_const(&c)).is_none());
+                    assert!(self.nodes.insert(id, tm.bv_const(&c)).is_none());
                 }
                 _ => {
-                    let term = self.parse_op(second, split);
+                    let term = self.parse_op(&mut tm, second, split);
                     assert!(self.nodes.insert(id, term).is_none());
                 }
             }
@@ -142,14 +143,19 @@ impl Parser {
         }
     }
 
-    fn parse_op<'a>(&mut self, second: &str, mut split: impl Iterator<Item = &'a str>) -> Term {
+    fn parse_op<'a>(
+        &mut self,
+        tm: &mut TermManager,
+        second: &str,
+        mut split: impl Iterator<Item = &'a str>,
+    ) -> Term {
         let op = DynOp::from(second);
         let _sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         let mut operand = Vec::new();
         if &op == &op::Uext {
             let opa = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
             let ext_len: usize = split.next().unwrap().parse().unwrap();
-            let ext_len = Term::bv_const(&vec![false; ext_len]);
+            let ext_len = tm.bv_const(&vec![false; ext_len]);
             operand.push(opa);
             operand.push(ext_len);
         } else {
@@ -157,7 +163,7 @@ impl Parser {
                 operand.push(self.nodes.get(&parse_id(&mut split)).unwrap().clone());
             }
         }
-        Term::new_op_term(op, &operand)
+        tm.new_op_term(op, &operand)
         // if second == "slice" {
         //     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         //     let a = self.nodes.get(&parse_id(&mut split)).unwrap();

@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+aig = "0.2.4"
 fol = { path = "../fol" }
 num-bigint = "0.4.5"
 num-traits = "0.2.19"
