@@ -26,15 +26,15 @@ where
 
 #[derive(Default)]
 struct Parser {
-    sorts: HashMap<u32, Sort>,
-    nodes: HashMap<u32, Term>,
+    sorts: HashMap<usize, Sort>,
+    nodes: HashMap<usize, Term>,
 }
 
 impl Parser {
     pub fn parse_sort<'a>(&self, mut split: impl Iterator<Item = &'a str>) -> Sort {
         match split.next().unwrap() {
             "bitvec" => {
-                let w = split.next().unwrap().parse::<u32>().unwrap();
+                let w = split.next().unwrap().parse::<usize>().unwrap();
                 Sort::Bv(w)
             }
             "array" => {
@@ -122,7 +122,7 @@ impl Parser {
                     let c = BigInt::from_str_radix(c, radix).unwrap();
                     let (_, c) = c.to_radix_le(2);
                     let mut c: Vec<bool> = c.into_iter().map(|x| x == 1).collect();
-                    while (c.len() as u32) < w {
+                    while (c.len() as usize) < w {
                         c.push(false);
                     }
                     assert!(self.nodes.insert(id, tm.bv_const(&c)).is_none());
@@ -134,6 +134,7 @@ impl Parser {
             }
         }
         Btor {
+            tm,
             input,
             latch,
             init,
@@ -167,8 +168,8 @@ impl Parser {
         // if second == "slice" {
         //     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         //     let a = self.nodes.get(&parse_id(&mut split)).unwrap();
-        //     let upper: u32 = split.next().unwrap().parse().unwrap();
-        //     let lower: u32 = split.next().unwrap().parse().unwrap();
+        //     let upper: usize = split.next().unwrap().parse().unwrap();
+        //     let lower: usize = split.next().unwrap().parse().unwrap();
         //     return a.slice(upper, lower);
         // }
         // todo!()
@@ -184,6 +185,6 @@ pub enum ConstType {
 }
 
 #[inline]
-fn parse_id<'a>(split: &mut impl Iterator<Item = &'a str>) -> u32 {
+fn parse_id<'a>(split: &mut impl Iterator<Item = &'a str>) -> usize {
     split.next().unwrap().parse().unwrap()
 }
