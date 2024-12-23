@@ -17,9 +17,10 @@ pub struct Btor {
 }
 
 impl Btor {
-    pub fn new<P: AsRef<Path>>(tm: &TermManager, path: P) -> Self {
+    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+        let tm = TermManager::new();
         let content = std::fs::read_to_string(path).unwrap();
-        let mut parser = Parser::new(tm);
+        let mut parser = Parser::new(&tm);
         parser.parse(&content)
     }
 }
