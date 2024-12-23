@@ -2,7 +2,8 @@ mod bitblast;
 mod parse;
 
 use fol::{Term, TermManager};
-use std::collections::HashMap;
+use parse::Parser;
+use std::{collections::HashMap, path::Path};
 
 #[derive(Debug)]
 pub struct Btor {
@@ -13,4 +14,12 @@ pub struct Btor {
     pub next: HashMap<Term, Term>,
     pub bad: Vec<Term>,
     pub constraint: Vec<Term>,
+}
+
+impl Btor {
+    pub fn new<P: AsRef<Path>>(tm: &TermManager, path: P) -> Self {
+        let content = std::fs::read_to_string(path).unwrap();
+        let mut parser = Parser::new(tm);
+        parser.parse(&content)
+    }
 }
