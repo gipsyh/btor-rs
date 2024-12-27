@@ -82,9 +82,11 @@ impl Parser {
                     init.insert(state, value);
                 }
                 "next" => {
-                    let _sort = self.sorts.get(&parse_id(&mut split)).unwrap();
+                    let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
                     let state = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
                     let value = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    assert!(state.sort().eq(sort));
+                    assert!(value.sort().eq(sort));
                     next.insert(state, value);
                 }
                 "output" => {
@@ -112,7 +114,7 @@ impl Parser {
                     let c = BigInt::from_str_radix(c, radix).unwrap();
                     let (_, c) = c.to_radix_le(2);
                     let mut c: Vec<bool> = c.into_iter().map(|x| x == 1).collect();
-                    while (c.len() as usize) < w {
+                    while c.len() < w {
                         c.push(false);
                     }
                     assert!(self.nodes.insert(id, self.tm.bv_const(&c)).is_none());
@@ -136,12 +138,12 @@ impl Parser {
 
     fn parse_op<'a>(&mut self, second: &str, mut split: impl Iterator<Item = &'a str>) -> Term {
         let op = DynOp::from(second);
-        let _sort = self.sorts.get(&parse_id(&mut split)).unwrap();
+        let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         let mut operand = Vec::new();
-        if &op == &op::Uext {
+        if op == op::Uext {
             let opa = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
             let ext_len: usize = split.next().unwrap().parse().unwrap();
-            let ext_len = self.tm.bv_const(&vec![false; ext_len]);
+            let ext_len = self.tm.bv_const_zero(ext_len);
             operand.push(opa);
             operand.push(ext_len);
         } else {
@@ -149,7 +151,9 @@ impl Parser {
                 operand.push(self.nodes.get(&parse_id(&mut split)).unwrap().clone());
             }
         }
-        self.tm.new_op_term(op, &operand)
+        let res = self.tm.new_op_term(op, &operand);
+        assert!(res.sort().eq(sort));
+        res
         // if second == "slice" {
         //     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         //     let a = self.nodes.get(&parse_id(&mut split)).unwrap();
