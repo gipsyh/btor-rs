@@ -22,6 +22,16 @@ impl Parser {
         }
     }
 
+    #[inline]
+    fn get_node(&self, nid: isize) -> Term {
+        let abs: usize = nid.abs() as usize;
+        let mut res = self.nodes.get(&abs).unwrap().clone();
+        if nid < 0 {
+            res = !res;
+        }
+        res
+    }
+
     pub fn parse_sort<'a>(&self, mut split: impl Iterator<Item = &'a str>) -> Sort {
         match split.next().unwrap() {
             "bitvec" => {
@@ -77,28 +87,28 @@ impl Parser {
                 }
                 "init" => {
                     let _sort = self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let state = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
-                    let value = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    let state = self.get_node(parse_signed_id(&mut split));
+                    let value = self.get_node(parse_signed_id(&mut split));
                     init.insert(state, value);
                 }
                 "next" => {
                     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let state = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
-                    let value = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    let state = self.get_node(parse_signed_id(&mut split));
+                    let value = self.get_node(parse_signed_id(&mut split));
                     assert!(state.sort().eq(sort));
                     assert!(value.sort().eq(sort));
                     next.insert(state, value);
                 }
                 "output" => {
-                    let o = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    let o = self.get_node(parse_signed_id(&mut split));
                     output.push(o);
                 }
                 "bad" => {
-                    let b = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    let b = self.get_node(parse_signed_id(&mut split));
                     bad.push(b);
                 }
                 "constraint" => {
-                    let c = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+                    let c = self.get_node(parse_signed_id(&mut split));
                     constraint.push(c);
                 }
                 "const" | "constd" | "consth" => {
@@ -118,6 +128,13 @@ impl Parser {
                         c.push(false);
                     }
                     assert!(self.nodes.insert(id, self.tm.bv_const(&c)).is_none());
+                }
+                "zero" => {
+                    let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
+                    assert!(self
+                        .nodes
+                        .insert(id, self.tm.bv_const_zero(sort.bv_len()))
+                        .is_none());
                 }
                 _ => {
                     let term = self.parse_op(second, split);
@@ -141,13 +158,13 @@ impl Parser {
         let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         let mut operand = Vec::new();
         if op == op::Uext {
-            let opa = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+            let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
             let ext_len = self.tm.bv_const_zero(ext_len);
             operand.push(opa);
             operand.push(ext_len);
         } else if op == op::Slice {
-            let opa = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+            let opa = self.get_node(parse_signed_id(&mut split));
             let high: usize = split.next().unwrap().parse().unwrap();
             let low: usize = split.next().unwrap().parse().unwrap();
             operand.push(opa);
@@ -155,7 +172,7 @@ impl Parser {
             operand.push(self.tm.bv_const_zero(low));
         } else {
             for _ in 0..op.num_operand() {
-                operand.push(self.nodes.get(&parse_id(&mut split)).unwrap().clone());
+                operand.push(self.get_node(parse_signed_id(&mut split)));
             }
         }
         let res = self.tm.new_op_term(op, &operand);
@@ -174,5 +191,10 @@ pub enum ConstType {
 
 #[inline]
 fn parse_id<'a>(split: &mut impl Iterator<Item = &'a str>) -> usize {
+    split.next().unwrap().parse().unwrap()
+}
+
+#[inline]
+fn parse_signed_id<'a>(split: &mut impl Iterator<Item = &'a str>) -> isize {
     split.next().unwrap().parse().unwrap()
 }
