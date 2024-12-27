@@ -142,10 +142,19 @@ impl Parser {
                 }
             }
         }
+        let mut real_latch = Vec::new();
+        for l in latch {
+            if next.contains_key(&l) {
+                real_latch.push(l);
+            } else {
+                assert!(!init.contains_key(&l));
+                input.push(l);
+            }
+        }
         Btor {
             tm: self.tm.clone(),
             input,
-            latch,
+            latch: real_latch,
             init,
             next,
             bad,
