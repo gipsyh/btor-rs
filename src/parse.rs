@@ -146,6 +146,13 @@ impl Parser {
             let ext_len = self.tm.bv_const_zero(ext_len);
             operand.push(opa);
             operand.push(ext_len);
+        } else if op == op::Slice {
+            let opa = self.nodes.get(&parse_id(&mut split)).unwrap().clone();
+            let high: usize = split.next().unwrap().parse().unwrap();
+            let low: usize = split.next().unwrap().parse().unwrap();
+            operand.push(opa);
+            operand.push(self.tm.bv_const_zero(high));
+            operand.push(self.tm.bv_const_zero(low));
         } else {
             for _ in 0..op.num_operand() {
                 operand.push(self.nodes.get(&parse_id(&mut split)).unwrap().clone());
@@ -154,14 +161,6 @@ impl Parser {
         let res = self.tm.new_op_term(op, &operand);
         assert!(res.sort().eq(sort));
         res
-        // if second == "slice" {
-        //     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
-        //     let a = self.nodes.get(&parse_id(&mut split)).unwrap();
-        //     let upper: usize = split.next().unwrap().parse().unwrap();
-        //     let lower: usize = split.next().unwrap().parse().unwrap();
-        //     return a.slice(upper, lower);
-        // }
-        // todo!()
     }
 }
 
