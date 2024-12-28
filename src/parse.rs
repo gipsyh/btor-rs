@@ -58,7 +58,6 @@ impl Parser {
         let mut bad = Vec::new();
         let mut constraint = Vec::new();
         for line in s.lines() {
-            dbg!(line);
             if line.starts_with(';') {
                 continue;
             }
