@@ -165,7 +165,7 @@ impl Parser {
         let op = DynOp::from(second);
         let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         let mut operand = Vec::new();
-        if op == op::Uext {
+        if op == op::Uext || op == op::Sext {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
             let ext_len = self.tm.bv_const_zero(ext_len);
