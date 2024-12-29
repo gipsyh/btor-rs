@@ -128,7 +128,7 @@ impl Parser {
                     }
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.mk_bv_const(BvConst::new(&c)))
+                        .insert(id, self.tm.bv_const(BvConst::new(&c)))
                         .is_none());
                 }
                 "zero" => {
