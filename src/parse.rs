@@ -1,7 +1,7 @@
 use crate::Btor;
 use fol::{
     op::{self, DynOp},
-    Sort, Term, TermManager,
+    BvConst, Sort, Term, TermManager,
 };
 use num_bigint::BigInt;
 use num_traits::Num;
@@ -126,7 +126,10 @@ impl Parser {
                     while c.len() < w {
                         c.push(false);
                     }
-                    assert!(self.nodes.insert(id, self.tm.bv_const(&c)).is_none());
+                    assert!(self
+                        .nodes
+                        .insert(id, self.tm.mk_bv_const(BvConst::new(&c)))
+                        .is_none());
                 }
                 "zero" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
