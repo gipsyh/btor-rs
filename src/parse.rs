@@ -43,7 +43,7 @@ impl Parser {
                 let element = parse_id(&mut split);
                 let index = self.sorts.get(&index).unwrap();
                 let element = self.sorts.get(&element).unwrap();
-                Sort::Array(index.bv_len(), element.bv_len())
+                Sort::Array(index.bv(), element.bv())
             }
             _ => panic!(),
         }
@@ -135,7 +135,7 @@ impl Parser {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.bv_const_zero(sort.bv_len()))
+                        .insert(id, self.tm.bv_const_zero(sort.bv()))
                         .is_none());
                 }
                 _ => {
