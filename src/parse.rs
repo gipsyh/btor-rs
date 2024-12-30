@@ -138,6 +138,13 @@ impl Parser {
                         .insert(id, self.tm.bv_const_zero(sort.bv()))
                         .is_none());
                 }
+                "ones" => {
+                    let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
+                    assert!(self
+                        .nodes
+                        .insert(id, self.tm.bv_const_ones(sort.bv()))
+                        .is_none());
+                }
                 _ => {
                     let term = self.parse_op(second, split);
                     assert!(self.nodes.insert(id, term).is_none());
