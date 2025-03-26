@@ -1,18 +1,18 @@
 use crate::Btor;
 use fol::{bitblast::bitblast_terms, Term, TermManager};
-use std::collections::HashMap;
+use giputils::hash::GHashMap;
 
 impl Btor {
     pub fn bitblast(&self) -> Btor {
         let mut tm = TermManager::new();
-        let mut map = HashMap::new();
+        let mut map = GHashMap::new();
         let input: Vec<Term> = bitblast_terms(self.input.iter(), &mut tm, &mut map)
             .flatten()
             .collect();
         let latch: Vec<Term> = bitblast_terms(self.latch.iter(), &mut tm, &mut map)
             .flatten()
             .collect();
-        let mut init = HashMap::new();
+        let mut init = GHashMap::new();
         for (l, i) in self.init.iter() {
             let l = l.bitblast(&mut tm, &mut map);
             let i = i.bitblast(&mut tm, &mut map);
@@ -20,7 +20,7 @@ impl Btor {
                 init.insert(l.clone(), i.clone());
             }
         }
-        let mut next = HashMap::new();
+        let mut next = GHashMap::new();
         for (l, n) in self.next.iter() {
             let l = l.bitblast(&mut tm, &mut map);
             let n = n.bitblast(&mut tm, &mut map);

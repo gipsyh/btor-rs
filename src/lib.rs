@@ -2,16 +2,17 @@ mod bitblast;
 mod parse;
 
 use fol::{Term, TermManager};
+use giputils::hash::GHashMap;
 use parse::Parser;
-use std::{collections::HashMap, path::Path};
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct Btor {
     pub tm: TermManager,
     pub input: Vec<Term>,
     pub latch: Vec<Term>,
-    pub init: HashMap<Term, Term>,
-    pub next: HashMap<Term, Term>,
+    pub init: GHashMap<Term, Term>,
+    pub next: GHashMap<Term, Term>,
     pub bad: Vec<Term>,
     pub constraint: Vec<Term>,
 }

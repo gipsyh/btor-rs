@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 aig = { path = "../aig-rs", version = "0.3.0" }
+giputils = { path = "../giputils", version = "0.3.0" }
 fol = { path = "../fol" }
 num-bigint = "0.4.5"
 num-traits = "0.2.19"

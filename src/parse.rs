@@ -3,13 +3,13 @@ use fol::{
     op::{self, DynOp},
     BvConst, Sort, Term, TermManager,
 };
+use giputils::hash::GHashMap;
 use num_bigint::BigInt;
 use num_traits::Num;
-use std::collections::HashMap;
 
 pub struct Parser {
-    sorts: HashMap<usize, Sort>,
-    nodes: HashMap<usize, Term>,
+    sorts: GHashMap<usize, Sort>,
+    nodes: GHashMap<usize, Term>,
     tm: TermManager,
 }
 
@@ -52,8 +52,8 @@ impl Parser {
     pub fn parse(&mut self, s: &str) -> Btor {
         let mut input = Vec::new();
         let mut latch = Vec::new();
-        let mut init = HashMap::new();
-        let mut next = HashMap::new();
+        let mut init = GHashMap::new();
+        let mut next = GHashMap::new();
         let mut output = Vec::new();
         let mut bad = Vec::new();
         let mut constraint = Vec::new();
