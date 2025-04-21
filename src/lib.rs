@@ -6,7 +6,7 @@ use giputils::hash::GHashMap;
 use parse::Parser;
 use std::path::Path;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Btor {
     pub tm: TermManager,
     pub input: Vec<Term>,
@@ -18,7 +18,7 @@ pub struct Btor {
 }
 
 impl Btor {
-    pub fn new<P: AsRef<Path>>(path: P) -> Self {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Self {
         let tm = TermManager::new();
         let content = std::fs::read_to_string(path).unwrap();
         let mut parser = Parser::new(&tm);
