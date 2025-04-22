@@ -1,9 +1,9 @@
 use crate::Btor;
-use fol::{
+use giputils::hash::GHashMap;
+use logic_form::fol::{
     op::{self, DynOp},
     BvConst, Sort, Term, TermManager,
 };
-use giputils::hash::GHashMap;
 use num_bigint::BigInt;
 use num_traits::Num;
 
@@ -24,7 +24,7 @@ impl Parser {
 
     #[inline]
     fn get_node(&self, nid: isize) -> Term {
-        let abs: usize = nid.abs() as usize;
+        let abs: usize = nid.unsigned_abs();
         let mut res = self.nodes.get(&abs).unwrap().clone();
         if nid < 0 {
             res = !res;
@@ -160,6 +160,8 @@ impl Parser {
                 input.push(l);
             }
         }
+        input.sort_by_key(|x| x.var_term());
+        real_latch.sort_by_key(|x| x.var_term());
         Btor {
             tm: self.tm.clone(),
             input,

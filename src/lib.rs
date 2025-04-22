@@ -1,8 +1,9 @@
-mod bitblast;
+mod deparse;
 mod parse;
 
-use fol::{Term, TermManager};
+use deparse::Deparser;
 use giputils::hash::GHashMap;
+use logic_form::fol::{Term, TermManager};
 use parse::Parser;
 use std::path::Path;
 
@@ -23,5 +24,11 @@ impl Btor {
         let content = std::fs::read_to_string(path).unwrap();
         let mut parser = Parser::new(&tm);
         parser.parse(&content)
+    }
+
+    pub fn to_file<P: AsRef<Path>>(&self, path: P) {
+        let mut deparser = Deparser::new();
+        let c = deparser.deparse(self);
+        std::fs::write(path, c).unwrap();
     }
 }
