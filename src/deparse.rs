@@ -1,8 +1,7 @@
-use giputils::hash::GHashMap;
-use logic_form::fol::{Sort, Term, TermType};
-use std::ops::Deref;
-
 use crate::Btor;
+use giputils::hash::GHashMap;
+use logic_form::fol::{op, Sort, Term, TermType};
+use std::ops::Deref;
 
 pub struct Deparser {
     sorts: GHashMap<Sort, usize>,
@@ -36,7 +35,7 @@ impl Deparser {
         self.content.len()
     }
 
-    pub fn get_term_id(&mut self, term: &Term) -> usize {
+    fn get_term_id(&mut self, term: &Term) -> usize {
         if let Some(id) = self.terms.get(term) {
             return *id;
         }
@@ -48,12 +47,25 @@ impl Deparser {
                 line
             }
             TermType::Op(op) => {
-                let args: Vec<String> = op
-                    .terms
-                    .iter()
-                    .map(|arg| self.get_term_id(arg).to_string())
-                    .collect();
-                format!("{} {sid} {}", op.op.name().to_lowercase(), args.join(" "))
+                assert!(op.op.is_core());
+                let args: Vec<_> = if op.op == op::Sext || op.op == op::Uext {
+                    vec![self.get_term_id(&op.terms[0]), op.terms[1].bv_len()]
+                } else if op.op == op::Slice {
+                    let arg = self.get_term_id(&op.terms[0]);
+                    let h = op.terms[1].bv_len();
+                    let l = op.terms[2].bv_len();
+                    vec![arg, h, l]
+                } else {
+                    op.terms.iter().map(|arg| self.get_term_id(arg)).collect()
+                };
+                format!(
+                    "{} {sid} {}",
+                    op.op.name().to_lowercase(),
+                    args.iter()
+                        .map(|id| id.to_string())
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                )
             }
             TermType::Var(_) => panic!(),
         };
