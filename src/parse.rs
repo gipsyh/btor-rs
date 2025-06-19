@@ -1,6 +1,6 @@
 use crate::Btor;
 use giputils::hash::GHashMap;
-use logic_form::fol::{
+use logicrs::fol::{
     op::{self, DynOp},
     BvConst, Sort, Term, TermManager,
 };

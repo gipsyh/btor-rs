@@ -3,7 +3,7 @@ mod parse;
 
 use deparse::Deparser;
 use giputils::hash::GHashMap;
-use logic_form::fol::{Term, TermManager};
+use logicrs::fol::{Term, TermManager};
 use parse::Parser;
 use std::path::Path;
 
