@@ -138,7 +138,7 @@ impl Parser {
                         .insert(id, self.tm.bv_const_zero(sort.bv()))
                         .is_none());
                 }
-                "ones" => {
+                "ones" | "one" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(self
                         .nodes
