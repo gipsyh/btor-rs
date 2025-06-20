@@ -5,7 +5,7 @@ use deparse::Deparser;
 use giputils::hash::GHashMap;
 use logicrs::fol::{Term, TermManager};
 use parse::Parser;
-use std::path::Path;
+use std::{fmt::Display, path::Path};
 
 #[derive(Debug, Clone)]
 pub struct Btor {
@@ -30,5 +30,12 @@ impl Btor {
         let mut deparser = Deparser::new();
         let c = deparser.deparse(self);
         std::fs::write(path, c).unwrap();
+    }
+}
+
+impl Display for Btor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut deparser = Deparser::new();
+        f.write_str(&deparser.deparse(self))
     }
 }
