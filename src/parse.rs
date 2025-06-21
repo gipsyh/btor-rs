@@ -4,7 +4,7 @@ use logicrs::fol::{
     op::{self, DynOp},
     BvConst, Sort, Term, TermManager,
 };
-use num_bigint::BigInt;
+use num_bigint::{BigInt, Sign};
 use num_traits::Num;
 
 pub struct Parser {
@@ -121,10 +121,22 @@ impl Parser {
                         ConstType::Consth => 16,
                     };
                     let c = BigInt::from_str_radix(c, radix).unwrap();
-                    let (_, c) = c.to_radix_le(2);
+                    let (s, c) = c.to_radix_le(2);
                     let mut c: Vec<bool> = c.into_iter().map(|x| x == 1).collect();
                     while c.len() < w {
                         c.push(false);
+                    }
+                    if let Sign::Minus = s {
+                        c = c.into_iter().map(|x| !x).collect();
+                        let mut carry = true;
+                        for i in c.iter_mut() {
+                            if !carry {
+                                break;
+                            }
+                            let ni = *i ^ carry;
+                            carry = *i && carry;
+                            *i = ni;
+                        }
                     }
                     assert!(self
                         .nodes
