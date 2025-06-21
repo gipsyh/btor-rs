@@ -80,23 +80,19 @@ impl Deparser {
             self.content.push(line);
             self.terms.insert(i.clone(), self.content.len());
         }
-        for i in btor.init.values() {
-            self.get_sort_id(i.sort());
-            self.get_term_id(i);
-        }
         for l in btor.latch.iter() {
+            let init = btor
+                .init
+                .get(l)
+                .map(|i| (self.get_sort_id(i.sort()), self.get_term_id(i)));
             let line = format!("state {}", self.get_sort_id(l.sort()),);
             self.content.push(line);
-            self.terms.insert(l.clone(), self.content.len());
-        }
-        for (l, i) in btor.init.iter() {
-            let line = format!(
-                "init {} {} {}",
-                self.get_sort_id(l.sort()),
-                self.get_term_id(l),
-                self.get_term_id(i)
-            );
-            self.content.push(line);
+            let lid = self.content.len();
+            self.terms.insert(l.clone(), lid);
+            if let Some((sid, tid)) = init {
+                let line = format!("init {sid} {lid} {tid}",);
+                self.content.push(line);
+            }
         }
         for (l, i) in btor.next.iter() {
             let line = format!(
