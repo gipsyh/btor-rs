@@ -2,26 +2,18 @@ use crate::Btor;
 use giputils::hash::GHashMap;
 use logicrs::fol::{
     op::{self, DynOp},
-    BvConst, Sort, Term, TermManager,
+    BvConst, Sort, Term,
 };
 use num_bigint::{BigInt, Sign};
 use num_traits::Num;
 
+#[derive(Default)]
 pub struct Parser {
     sorts: GHashMap<usize, Sort>,
     nodes: GHashMap<usize, Term>,
-    tm: TermManager,
 }
 
 impl Parser {
-    pub fn new(tm: &TermManager) -> Self {
-        Self {
-            sorts: Default::default(),
-            nodes: Default::default(),
-            tm: tm.clone(),
-        }
-    }
-
     #[inline]
     fn get_node(&self, nid: isize) -> Term {
         let abs: usize = nid.unsigned_abs();
@@ -74,13 +66,13 @@ impl Parser {
                 }
                 "input" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let v = self.tm.new_var(sort);
+                    let v = Term::new_var(sort);
                     input.push(v.clone());
                     assert!(self.nodes.insert(id, v).is_none());
                 }
                 "state" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    let v = self.tm.new_var(sort);
+                    let v = Term::new_var(sort);
                     latch.push(v.clone());
                     assert!(self.nodes.insert(id, v).is_none());
                 }
@@ -140,28 +132,28 @@ impl Parser {
                     }
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.bv_const(BvConst::new(&c)))
+                        .insert(id, Term::bv_const(BvConst::new(&c)))
                         .is_none());
                 }
                 "zero" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.bv_const_zero(sort.bv()))
+                        .insert(id, Term::bv_const_zero(sort.bv()))
                         .is_none());
                 }
                 "one" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.bv_const_one(sort.bv()))
+                        .insert(id, Term::bv_const_one(sort.bv()))
                         .is_none());
                 }
                 "ones" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(self
                         .nodes
-                        .insert(id, self.tm.bv_const_ones(sort.bv()))
+                        .insert(id, Term::bv_const_ones(sort.bv()))
                         .is_none());
                 }
                 _ => {
@@ -171,7 +163,6 @@ impl Parser {
             }
         }
         Btor {
-            tm: self.tm.clone(),
             input,
             latch,
             init,
@@ -188,7 +179,7 @@ impl Parser {
         if op == op::Uext || op == op::Sext {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
-            let ext_len = self.tm.bv_const_zero(ext_len);
+            let ext_len = Term::bv_const_zero(ext_len);
             operand.push(opa);
             operand.push(ext_len);
         } else if op == op::Slice {
@@ -196,14 +187,14 @@ impl Parser {
             let high: usize = split.next().unwrap().parse().unwrap();
             let low: usize = split.next().unwrap().parse().unwrap();
             operand.push(opa);
-            operand.push(self.tm.bv_const_zero(high));
-            operand.push(self.tm.bv_const_zero(low));
+            operand.push(Term::bv_const_zero(high));
+            operand.push(Term::bv_const_zero(low));
         } else {
             for _ in 0..op.num_operand() {
                 operand.push(self.get_node(parse_signed_id(&mut split)));
             }
         }
-        let res = self.tm.new_op_term(op, &operand);
+        let res = Term::new_op(op, &operand);
         assert!(res.sort().eq(sort));
         res
     }

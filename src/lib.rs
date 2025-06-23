@@ -5,13 +5,12 @@ mod parse;
 
 use deparse::Deparser;
 use giputils::hash::GHashMap;
-use logicrs::fol::{Term, TermManager};
+use logicrs::fol::Term;
 use parse::Parser;
 use std::{fmt::Display, path::Path};
 
 #[derive(Debug, Clone)]
 pub struct Btor {
-    pub tm: TermManager,
     pub input: Vec<Term>,
     pub latch: Vec<Term>,
     pub init: GHashMap<Term, Term>,
@@ -22,9 +21,8 @@ pub struct Btor {
 
 impl Btor {
     pub fn from_file<P: AsRef<Path>>(path: P) -> Self {
-        let tm = TermManager::new();
         let content = std::fs::read_to_string(path).unwrap();
-        let mut parser = Parser::new(&tm);
+        let mut parser = Parser::default();
         parser.parse(&content)
     }
 
