@@ -1,8 +1,8 @@
 use crate::Btor;
 use giputils::hash::GHashMap;
 use logicrs::fol::{
-    op::{self, DynOp},
     BvConst, Sort, Term,
+    op::{self, DynOp},
 };
 use num_bigint::{BigInt, Sign};
 use num_traits::Num;
@@ -130,31 +130,35 @@ impl Parser {
                             *i = ni;
                         }
                     }
-                    assert!(self
-                        .nodes
-                        .insert(id, Term::bv_const(BvConst::new(&c)))
-                        .is_none());
+                    assert!(
+                        self.nodes
+                            .insert(id, Term::bv_const(BvConst::new(&c)))
+                            .is_none()
+                    );
                 }
                 "zero" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(self
-                        .nodes
-                        .insert(id, Term::bv_const_zero(sort.bv()))
-                        .is_none());
+                    assert!(
+                        self.nodes
+                            .insert(id, Term::bv_const_zero(sort.bv()))
+                            .is_none()
+                    );
                 }
                 "one" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(self
-                        .nodes
-                        .insert(id, Term::bv_const_one(sort.bv()))
-                        .is_none());
+                    assert!(
+                        self.nodes
+                            .insert(id, Term::bv_const_one(sort.bv()))
+                            .is_none()
+                    );
                 }
                 "ones" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(self
-                        .nodes
-                        .insert(id, Term::bv_const_ones(sort.bv()))
-                        .is_none());
+                    assert!(
+                        self.nodes
+                            .insert(id, Term::bv_const_ones(sort.bv()))
+                            .is_none()
+                    );
                 }
                 _ => {
                     let term = self.parse_op(second, split);

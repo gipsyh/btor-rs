@@ -1,6 +1,6 @@
 use crate::Btor;
 use giputils::hash::GHashMap;
-use logicrs::fol::{op, Sort, Term, TermType};
+use logicrs::fol::{Sort, Term, TermType, op};
 use std::ops::Deref;
 
 pub struct Deparser {
