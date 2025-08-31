@@ -35,6 +35,9 @@ impl Parser {
                 let element = parse_id(&mut split);
                 let index = self.sorts.get(&index).unwrap();
                 let element = self.sorts.get(&element).unwrap();
+                if element.is_array() {
+                    panic!("currently arrays of arrays are not supported");
+                }
                 Sort::Array(index.bv(), element.bv())
             }
             _ => panic!(),
