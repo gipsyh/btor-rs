@@ -1,6 +1,6 @@
 [package]
 name = "btor"
-version = "0.2.0"
+version = "0.2.1"
 license = "MIT"
 description = "Rust library for parsing and deparsing BTOR files"
 edition = "2024"
@@ -11,8 +11,8 @@ keywords = ["formal_method", "model_checking"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-giputils = { path = "../giputils", version = "0.3.4" }
-logicrs = { path = "../logicrs", version = "0.5.2" }
+giputils = { path = "../giputils", version = "0.3.5" }
+logicrs = { path = "../logicrs", version = "0.6.0" }
 num-bigint = "0.4.5"
 num-traits = "0.2.19"
 strum = { version = "0.27.1", features = ["derive"] }
