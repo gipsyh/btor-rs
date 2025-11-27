@@ -60,7 +60,7 @@ impl Deparser {
                 };
                 format!(
                     "{} {sid} {}",
-                    op.op.name().to_lowercase(),
+                    format!("{}", op.op).to_lowercase(),
                     args.iter()
                         .map(|id| id.to_string())
                         .collect::<Vec<_>>()
