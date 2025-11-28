@@ -11,6 +11,14 @@ use num_traits::Num;
 pub struct Parser {
     sorts: GHashMap<usize, Sort>,
     nodes: GHashMap<usize, Term>,
+    input: Vec<Term>,
+    latch: Vec<Term>,
+    init: GHashMap<Term, Term>,
+    next: GHashMap<Term, Term>,
+    output: Vec<Term>,
+    bad: Vec<Term>,
+    constraint: Vec<Term>,
+    symbols: GHashMap<Term, String>,
 }
 
 impl Parser {
@@ -24,7 +32,7 @@ impl Parser {
         res
     }
 
-    pub fn parse_sort<'a>(&self, mut split: impl Iterator<Item = &'a str>) -> Sort {
+    fn parse_sort<'a>(&self, mut split: impl Iterator<Item = &'a str>) -> Sort {
         match split.next().unwrap() {
             "bitvec" => {
                 let w = split.next().unwrap().parse::<usize>().unwrap();
@@ -44,14 +52,13 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self, s: &str) -> Btor {
-        let mut input = Vec::new();
-        let mut latch = Vec::new();
-        let mut init = GHashMap::new();
-        let mut next = GHashMap::new();
-        let mut output = Vec::new();
-        let mut bad = Vec::new();
-        let mut constraint = Vec::new();
+    fn parse_symbol<'a>(&mut self, t: &Term, mut split: impl Iterator<Item = &'a str>) {
+        if let Some(symbol) = split.next() {
+            self.symbols.insert(t.clone(), symbol.to_string());
+        }
+    }
+
+    pub fn parse(mut self, s: &str) -> Btor {
         for line in s.lines() {
             if line.starts_with(';') {
                 continue;
@@ -70,20 +77,22 @@ impl Parser {
                 "input" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     let v = Term::new_var(sort);
-                    input.push(v.clone());
+                    self.input.push(v.clone());
+                    self.parse_symbol(&v, split);
                     assert!(self.nodes.insert(id, v).is_none());
                 }
                 "state" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     let v = Term::new_var(sort);
-                    latch.push(v.clone());
+                    self.latch.push(v.clone());
+                    self.parse_symbol(&v, split);
                     assert!(self.nodes.insert(id, v).is_none());
                 }
                 "init" => {
                     let _sort = self.sorts.get(&parse_id(&mut split)).unwrap();
                     let state = self.get_node(parse_signed_id(&mut split));
                     let value = self.get_node(parse_signed_id(&mut split));
-                    init.insert(state, value);
+                    self.init.insert(state, value);
                 }
                 "next" => {
                     let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
@@ -91,19 +100,19 @@ impl Parser {
                     let value = self.get_node(parse_signed_id(&mut split));
                     assert!(state.sort().eq(sort));
                     assert!(value.sort().eq(sort));
-                    next.insert(state, value);
+                    self.next.insert(state, value);
                 }
                 "output" => {
                     let o = self.get_node(parse_signed_id(&mut split));
-                    output.push(o);
+                    self.output.push(o);
                 }
                 "bad" => {
                     let b = self.get_node(parse_signed_id(&mut split));
-                    bad.push(b);
+                    self.bad.push(b);
                 }
                 "constraint" => {
                     let c = self.get_node(parse_signed_id(&mut split));
-                    constraint.push(c);
+                    self.constraint.push(c);
                 }
                 "const" | "constd" | "consth" => {
                     let ty = ConstType::try_from(second).unwrap();
@@ -170,12 +179,13 @@ impl Parser {
             }
         }
         Btor {
-            input,
-            latch,
-            init,
-            next,
-            bad,
-            constraint,
+            input: self.input,
+            latch: self.latch,
+            init: self.init,
+            next: self.next,
+            bad: self.bad,
+            constraint: self.constraint,
+            symbols: self.symbols,
         }
     }
 

@@ -17,12 +17,13 @@ pub struct Btor {
     pub next: GHashMap<Term, Term>,
     pub bad: Vec<Term>,
     pub constraint: Vec<Term>,
+    pub symbols: GHashMap<Term, String>,
 }
 
 impl Btor {
     pub fn from_file<P: AsRef<Path>>(path: P) -> Self {
         let content = std::fs::read_to_string(path).unwrap();
-        let mut parser = Parser::default();
+        let parser = Parser::default();
         parser.parse(&content)
     }
 
