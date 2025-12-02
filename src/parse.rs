@@ -196,9 +196,13 @@ impl Parser {
         if op == op::Uext || op == op::Sext {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
-            let ext_len = Term::bv_const(BitVec::zero(ext_len));
-            operand.push(opa);
-            operand.push(ext_len);
+            if ext_len == 0 {
+                return opa;
+            } else {
+                let ext_len = Term::bv_const(BitVec::zero(ext_len));
+                operand.push(opa);
+                operand.push(ext_len);
+            }
         } else if op == op::Slice {
             let opa = self.get_node(parse_signed_id(&mut split));
             let high: usize = split.next().unwrap().parse().unwrap();
