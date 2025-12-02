@@ -43,7 +43,7 @@ impl Deparser {
         let line = match term.deref() {
             TermType::Const(c) => {
                 let mut line = format!("const {sid} ");
-                line.extend(c.iter().map(|b| if *b { '1' } else { '0' }).rev());
+                line.extend(c.iter().map(|b| if b { '1' } else { '0' }).rev());
                 line
             }
             TermType::Op(op) => {

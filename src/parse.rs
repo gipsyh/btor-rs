@@ -1,7 +1,7 @@
 use crate::Btor;
-use giputils::hash::GHashMap;
+use giputils::{bitvec::BitVec, hash::GHashMap};
 use logicrs::fol::{
-    BvConst, Sort, Term,
+    Sort, Term,
     op::{self, DynOp},
 };
 use num_bigint::{BigInt, Sign};
@@ -144,7 +144,7 @@ impl Parser {
                     }
                     assert!(
                         self.nodes
-                            .insert(id, Term::bv_const(BvConst::new(&c)))
+                            .insert(id, Term::bv_const(BitVec::from(&c)))
                             .is_none()
                     );
                 }
@@ -152,7 +152,7 @@ impl Parser {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(
                         self.nodes
-                            .insert(id, Term::bv_const(BvConst::zero(sort.bv())))
+                            .insert(id, Term::bv_const(BitVec::zero(sort.bv())))
                             .is_none()
                     );
                 }
@@ -160,7 +160,7 @@ impl Parser {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(
                         self.nodes
-                            .insert(id, Term::bv_const(BvConst::one(sort.bv())))
+                            .insert(id, Term::bv_const(BitVec::one(sort.bv())))
                             .is_none()
                     );
                 }
@@ -168,7 +168,7 @@ impl Parser {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
                     assert!(
                         self.nodes
-                            .insert(id, Term::bv_const(BvConst::ones(sort.bv())))
+                            .insert(id, Term::bv_const(BitVec::ones(sort.bv())))
                             .is_none()
                     );
                 }
@@ -196,7 +196,7 @@ impl Parser {
         if op == op::Uext || op == op::Sext {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
-            let ext_len = Term::bv_const(BvConst::zero(ext_len));
+            let ext_len = Term::bv_const(BitVec::zero(ext_len));
             operand.push(opa);
             operand.push(ext_len);
         } else if op == op::Slice {
@@ -204,8 +204,8 @@ impl Parser {
             let high: usize = split.next().unwrap().parse().unwrap();
             let low: usize = split.next().unwrap().parse().unwrap();
             operand.push(opa);
-            operand.push(Term::bv_const(BvConst::zero(high)));
-            operand.push(Term::bv_const(BvConst::zero(low)));
+            operand.push(Term::bv_const(BitVec::zero(high)));
+            operand.push(Term::bv_const(BitVec::zero(low)));
         } else {
             for _ in 0..op.num_operand() {
                 operand.push(self.get_node(parse_signed_id(&mut split)));
