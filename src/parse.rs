@@ -104,14 +104,17 @@ impl Parser {
                 }
                 "output" => {
                     let o = self.get_node(parse_signed_id(&mut split));
+                    self.parse_symbol(&o, split);
                     self.output.push(o);
                 }
                 "bad" => {
                     let b = self.get_node(parse_signed_id(&mut split));
+                    self.parse_symbol(&b, split);
                     self.bad.push(b);
                 }
                 "constraint" => {
                     let c = self.get_node(parse_signed_id(&mut split));
+                    self.parse_symbol(&c, split);
                     self.constraint.push(c);
                 }
                 "const" | "constd" | "consth" => {
