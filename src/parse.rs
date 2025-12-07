@@ -130,6 +130,7 @@ impl Parser {
                     let c = BigInt::from_str_radix(c, radix).unwrap();
                     let (s, c) = c.to_radix_le(2);
                     let mut c: Vec<bool> = c.into_iter().map(|x| x == 1).collect();
+                    assert!(c.len() <= w);
                     while c.len() < w {
                         c.push(false);
                     }
