@@ -4,7 +4,7 @@ use logicrs::fol::Term;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
-struct Clock {
+pub struct Clock {
     path: Vec<String>,
     offset: u32,
     edge: String,
@@ -18,19 +18,28 @@ pub struct SignalPart {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct BtorWitnessMap {
-    version: String,
-    generator: String,
-    clocks: Vec<Clock>,
-    inputs: Vec<Vec<SignalPart>>,
-    states: Vec<Vec<SignalPart>>,
-    asserts: Vec<Vec<String>>,
-    assumes: Vec<Vec<String>>,
+pub struct YosysWitnessBTOR {
+    pub version: String,
+    pub generator: String,
+    pub clocks: Vec<Clock>,
+    pub inputs: Vec<Vec<SignalPart>>,
+    pub states: Vec<Vec<SignalPart>>,
+    pub asserts: Vec<Vec<String>>,
+    pub assumes: Vec<Vec<String>>,
 }
 
 impl Btor {
+    pub fn ywb(&self, s: &str) -> YosysWitnessBTOR {
+        let ywb: YosysWitnessBTOR = serde_json::from_str(s).unwrap();
+        assert!(self.input.len() == ywb.inputs.len());
+        assert!(self.latch.len() == ywb.states.len());
+        assert!(self.bad.len() == ywb.asserts.len());
+        assert!(self.constraint.len() == ywb.assumes.len());
+        ywb
+    }
+
     pub fn witness_map(&self, s: &str) -> GHashMap<Term, Vec<SignalPart>> {
-        let ywb: BtorWitnessMap = serde_json::from_str(s).unwrap();
+        let ywb: YosysWitnessBTOR = serde_json::from_str(s).unwrap();
         assert!(self.input.len() == ywb.inputs.len());
         assert!(self.latch.len() == ywb.states.len());
         let mut map: GHashMap<Term, Vec<SignalPart>> = GHashMap::new();
