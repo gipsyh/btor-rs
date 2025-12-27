@@ -18,7 +18,7 @@ pub struct Parser {
     output: Vec<Term>,
     bad: Vec<Term>,
     constraint: Vec<Term>,
-    symbols: GHashMap<Term, String>,
+    symbols: GHashMap<Term, Vec<String>>,
 }
 
 impl Parser {
@@ -61,7 +61,10 @@ impl Parser {
         if symbol == ";" || symbol.starts_with(';') {
             return;
         }
-        self.symbols.insert(t.clone(), symbol.to_string());
+        self.symbols
+            .entry(t.clone())
+            .or_default()
+            .push(symbol.to_string());
     }
 
     pub fn parse(mut self, s: &str) -> Btor {
@@ -199,6 +202,7 @@ impl Parser {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
             if ext_len == 0 {
+                self.parse_symbol(&opa, split);
                 return opa;
             } else {
                 let ext_len = Term::bv_const(BitVec::zero(ext_len));
