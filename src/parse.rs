@@ -53,9 +53,15 @@ impl Parser {
     }
 
     fn parse_symbol<'a>(&mut self, t: &Term, mut split: impl Iterator<Item = &'a str>) {
-        if let Some(symbol) = split.next() {
-            self.symbols.insert(t.clone(), symbol.to_string());
+        // BTOR2 allows an optional symbol token, followed by an optional inline comment
+        // starting with ';'. If the next token is ';' (or contains ';'), it is comment-only.
+        let Some(symbol) = split.next() else {
+            return;
+        };
+        if symbol == ";" || symbol.starts_with(';') {
+            return;
         }
+        self.symbols.insert(t.clone(), symbol.to_string());
     }
 
     pub fn parse(mut self, s: &str) -> Btor {
@@ -146,35 +152,27 @@ impl Parser {
                             *i = ni;
                         }
                     }
-                    assert!(
-                        self.nodes
-                            .insert(id, Term::bv_const(BitVec::from(&c)))
-                            .is_none()
-                    );
+                    let v = Term::bv_const(BitVec::from(&c));
+                    self.parse_symbol(&v, split);
+                    assert!(self.nodes.insert(id, v).is_none());
                 }
                 "zero" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(
-                        self.nodes
-                            .insert(id, Term::bv_const(BitVec::zero(sort.bv())))
-                            .is_none()
-                    );
+                    let v = Term::bv_const(BitVec::zero(sort.bv()));
+                    self.parse_symbol(&v, split);
+                    assert!(self.nodes.insert(id, v).is_none());
                 }
                 "one" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(
-                        self.nodes
-                            .insert(id, Term::bv_const(BitVec::one(sort.bv())))
-                            .is_none()
-                    );
+                    let v = Term::bv_const(BitVec::one(sort.bv()));
+                    self.parse_symbol(&v, split);
+                    assert!(self.nodes.insert(id, v).is_none());
                 }
                 "ones" => {
                     let sort = *self.sorts.get(&parse_id(&mut split)).unwrap();
-                    assert!(
-                        self.nodes
-                            .insert(id, Term::bv_const(BitVec::ones(sort.bv())))
-                            .is_none()
-                    );
+                    let v = Term::bv_const(BitVec::ones(sort.bv()));
+                    self.parse_symbol(&v, split);
+                    assert!(self.nodes.insert(id, v).is_none());
                 }
                 _ => {
                     let term = self.parse_op(second, split);
@@ -221,6 +219,7 @@ impl Parser {
         }
         let res = Term::new_op(op, &operand);
         assert!(res.sort().eq(sort));
+        self.parse_symbol(&res, split);
         res
     }
 }
