@@ -1,5 +1,3 @@
-#![feature(formatting_options)]
-
 mod deparse;
 mod parse;
 pub mod ywb;
