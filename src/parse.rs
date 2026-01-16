@@ -19,6 +19,7 @@ pub struct Parser {
     bad: Vec<Term>,
     constraint: Vec<Term>,
     symbols: GHashMap<Term, Vec<String>>,
+    prop_labels: Vec<String>,
 }
 
 impl Parser {
@@ -58,7 +59,7 @@ impl Parser {
         let Some(symbol) = split.next() else {
             return;
         };
-        if symbol == ";" || symbol.starts_with(';') {
+        if symbol.starts_with(';') {
             return;
         }
         self.symbols
@@ -118,7 +119,13 @@ impl Parser {
                 }
                 "bad" => {
                     let b = self.get_node(parse_signed_id(&mut split));
-                    self.parse_symbol(&b, split);
+                    if let Some(symbol) = split.next()
+                        && !symbol.starts_with(';')
+                    {
+                        self.prop_labels.push(symbol.to_string());
+                    } else {
+                        self.prop_labels.push(String::new());
+                    }
                     self.bad.push(b);
                 }
                 "constraint" => {
@@ -191,6 +198,7 @@ impl Parser {
             bad: self.bad,
             constraint: self.constraint,
             symbols: self.symbols,
+            prop_label: self.prop_labels,
         }
     }
 

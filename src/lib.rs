@@ -17,6 +17,7 @@ pub struct Btor {
     pub bad: Vec<Term>,
     pub constraint: Vec<Term>,
     pub symbols: GHashMap<Term, Vec<String>>,
+    pub prop_label: Vec<String>,
 }
 
 impl Btor {
