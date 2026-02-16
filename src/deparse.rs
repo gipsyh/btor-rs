@@ -94,14 +94,16 @@ impl Deparser {
                 self.content.push(line);
             }
         }
-        for (l, i) in btor.next.iter() {
-            let line = format!(
-                "next {} {} {}",
-                self.get_sort_id(l.sort()),
-                self.get_term_id(l),
-                self.get_term_id(i)
-            );
-            self.content.push(line);
+        for l in btor.latch.iter() {
+            if let Some(i) = btor.next.get(l) {
+                let line = format!(
+                    "next {} {} {}",
+                    self.get_sort_id(l.sort()),
+                    self.get_term_id(l),
+                    self.get_term_id(i)
+                );
+                self.content.push(line);
+            }
         }
         for b in btor.bad.iter() {
             let line = format!("bad {}", self.get_term_id(b));
