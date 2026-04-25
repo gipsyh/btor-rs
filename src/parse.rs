@@ -1,9 +1,6 @@
 use crate::Btor;
 use giputils::{bitvec::BitVec, hash::GHashMap};
-use logicrs::fol::{
-    Sort, Term,
-    op::{self, DynOp},
-};
+use logicrs::fol::{FolOp, Sort, Term};
 use num_bigint::{BigInt, Sign};
 use num_traits::Num;
 
@@ -203,10 +200,10 @@ impl Parser {
     }
 
     fn parse_op<'a>(&mut self, second: &str, mut split: impl Iterator<Item = &'a str>) -> Term {
-        let op = DynOp::from(second);
+        let op = FolOp::from(second);
         let sort = self.sorts.get(&parse_id(&mut split)).unwrap();
         let mut operand = Vec::new();
-        if op == op::Uext || op == op::Sext {
+        if op == FolOp::Uext || op == FolOp::Sext {
             let opa = self.get_node(parse_signed_id(&mut split));
             let ext_len: usize = split.next().unwrap().parse().unwrap();
             if ext_len == 0 {
@@ -217,7 +214,7 @@ impl Parser {
                 operand.push(opa);
                 operand.push(ext_len);
             }
-        } else if op == op::Slice {
+        } else if op == FolOp::Slice {
             let opa = self.get_node(parse_signed_id(&mut split));
             let high: usize = split.next().unwrap().parse().unwrap();
             let low: usize = split.next().unwrap().parse().unwrap();

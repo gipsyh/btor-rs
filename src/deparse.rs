@@ -1,6 +1,6 @@
 use crate::Btor;
 use giputils::hash::GHashMap;
-use logicrs::fol::{Sort, Term, TermType, op};
+use logicrs::fol::{FolOp, Sort, Term, TermType};
 use std::ops::Deref;
 
 pub struct Deparser {
@@ -48,9 +48,9 @@ impl Deparser {
             }
             TermType::Op(op) => {
                 assert!(op.op.is_core());
-                let args: Vec<_> = if op.op == op::Sext || op.op == op::Uext {
+                let args: Vec<_> = if op.op == FolOp::Sext || op.op == FolOp::Uext {
                     vec![self.get_term_id(&op.terms[0]), op.terms[1].bv_len()]
-                } else if op.op == op::Slice {
+                } else if op.op == FolOp::Slice {
                     let arg = self.get_term_id(&op.terms[0]);
                     let h = op.terms[1].bv_len();
                     let l = op.terms[2].bv_len();
