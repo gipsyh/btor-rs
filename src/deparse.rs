@@ -6,6 +6,7 @@ use std::ops::Deref;
 pub struct Deparser {
     sorts: GHashMap<Sort, usize>,
     terms: GHashMap<Term, usize>,
+    symbols: GHashMap<Term, Vec<String>>,
     content: Vec<String>,
 }
 
@@ -14,8 +15,18 @@ impl Deparser {
         Self {
             sorts: Default::default(),
             terms: Default::default(),
+            symbols: Default::default(),
             content: Vec::new(),
         }
+    }
+
+    fn symbol_suffix(&self, term: &Term) -> String {
+        self.symbols
+            .get(term)
+            .map(|names| names.join(","))
+            .filter(|symbol| !symbol.is_empty())
+            .map(|s| format!(" {s}"))
+            .unwrap_or_default()
     }
 
     fn get_sort_id(&mut self, sort: Sort) -> usize {
@@ -40,7 +51,7 @@ impl Deparser {
             return *id;
         }
         let sid = self.get_sort_id(term.sort());
-        let line = match term.deref() {
+        let mut line = match term.deref() {
             TermType::Const(c) => {
                 let mut line = format!("const {sid} ");
                 line.extend(c.iter().map(|b| if b { '1' } else { '0' }).rev());
@@ -69,14 +80,20 @@ impl Deparser {
             }
             TermType::Var(_) => panic!(),
         };
+        line.push_str(&self.symbol_suffix(term));
         self.content.push(line);
         self.terms.insert(term.clone(), self.content.len());
         self.content.len()
     }
 
     pub fn deparse(&mut self, btor: &Btor) -> String {
+        self.symbols = btor.symbols.clone();
         for i in btor.input.iter() {
-            let line = format!("input {}", self.get_sort_id(i.sort()),);
+            let line = format!(
+                "input {}{}",
+                self.get_sort_id(i.sort()),
+                self.symbol_suffix(i)
+            );
             self.content.push(line);
             self.terms.insert(i.clone(), self.content.len());
         }
@@ -85,7 +102,11 @@ impl Deparser {
                 .init
                 .get(l)
                 .map(|i| (self.get_sort_id(i.sort()), self.get_term_id(i)));
-            let line = format!("state {}", self.get_sort_id(l.sort()),);
+            let line = format!(
+                "state {}{}",
+                self.get_sort_id(l.sort()),
+                self.symbol_suffix(l)
+            );
             self.content.push(line);
             let lid = self.content.len();
             self.terms.insert(l.clone(), lid);
@@ -105,8 +126,8 @@ impl Deparser {
                 self.content.push(line);
             }
         }
-        for b in btor.bad.iter() {
-            let line = format!("bad {}", self.get_term_id(b));
+        for (b, s) in btor.bad.iter().zip(btor.prop_label.iter()) {
+            let line = format!("bad {} {s}", self.get_term_id(b));
             self.content.push(line);
         }
         for c in btor.constraint.iter() {

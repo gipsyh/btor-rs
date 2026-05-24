@@ -52,17 +52,20 @@ impl Parser {
 
     fn parse_symbol<'a>(&mut self, t: &Term, mut split: impl Iterator<Item = &'a str>) {
         // BTOR2 allows an optional symbol token, followed by an optional inline comment
-        // starting with ';'. If the next token is ';' (or contains ';'), it is comment-only.
+        // starting with ';'. Only the first symbol token is significant; any following
+        // whitespace-separated tokens are comments/ignored text.
         let Some(symbol) = split.next() else {
             return;
         };
         if symbol.starts_with(';') {
             return;
         }
-        self.symbols
-            .entry(t.clone())
-            .or_default()
-            .push(symbol.to_string());
+        let entry = self.symbols.entry(t.clone()).or_default();
+        for symbol in symbol.split(',').filter(|symbol| !symbol.is_empty()) {
+            if !entry.iter().any(|existing| existing == symbol) {
+                entry.push(symbol.to_string());
+            }
+        }
     }
 
     pub fn parse(mut self, s: &str) -> Btor {
