@@ -127,7 +127,11 @@ impl Deparser {
             }
         }
         for (b, s) in btor.bad.iter().zip(btor.prop_label.iter()) {
-            let line = format!("bad {} {s}", self.get_term_id(b));
+            let line = if s.is_empty() {
+                format!("bad {}", self.get_term_id(b))
+            } else {
+                format!("bad {} {s}", self.get_term_id(b))
+            };
             self.content.push(line);
         }
         for c in btor.constraint.iter() {
