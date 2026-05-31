@@ -134,6 +134,10 @@ impl Deparser {
             };
             self.content.push(line);
         }
+        for o in btor.output.iter() {
+            let line = format!("output {}{}", self.get_term_id(o), self.symbol_suffix(o));
+            self.content.push(line);
+        }
         for c in btor.constraint.iter() {
             let line = format!("constraint {}", self.get_term_id(c));
             self.content.push(line);

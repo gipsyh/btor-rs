@@ -114,8 +114,9 @@ impl Parser {
                 }
                 "output" => {
                     let o = self.get_node(parse_signed_id(&mut split));
+                    self.output.push(o.clone());
                     self.parse_symbol(&o, split);
-                    self.output.push(o);
+                    assert!(self.nodes.insert(id, o).is_none());
                 }
                 "bad" => {
                     let b = self.get_node(parse_signed_id(&mut split));
@@ -196,6 +197,7 @@ impl Parser {
             init: self.init,
             next: self.next,
             bad: self.bad,
+            output: self.output,
             constraint: self.constraint,
             symbols: self.symbols,
             prop_label: self.prop_labels,
