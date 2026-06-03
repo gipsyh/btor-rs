@@ -1,12 +1,12 @@
 use crate::Btor;
 use giputils::hash::GHashMap;
-use logicrs::fol::{FolOp, Sort, Term, TermType};
+use logicrs::fol::{FolOp, Sort, Term, TermSymbol, TermType};
 use std::ops::Deref;
 
 pub struct Deparser {
     sorts: GHashMap<Sort, usize>,
     terms: GHashMap<Term, usize>,
-    symbols: GHashMap<Term, Vec<String>>,
+    symbols: TermSymbol,
     content: Vec<String>,
 }
 

@@ -1,6 +1,6 @@
 use crate::Btor;
 use giputils::{bitvec::BitVec, hash::GHashMap};
-use logicrs::fol::{FolOp, Sort, Term};
+use logicrs::fol::{FolOp, Sort, Term, TermSymbol};
 use num_bigint::{BigInt, Sign};
 use num_traits::Num;
 
@@ -15,7 +15,7 @@ pub struct Parser {
     output: Vec<Term>,
     bad: Vec<Term>,
     constraint: Vec<Term>,
-    symbols: GHashMap<Term, Vec<String>>,
+    symbols: TermSymbol,
     prop_labels: Vec<String>,
 }
 

@@ -4,7 +4,7 @@ pub mod ywb;
 
 use deparse::Deparser;
 use giputils::hash::GHashMap;
-use logicrs::fol::Term;
+use logicrs::fol::{Term, TermSymbol};
 use parse::Parser;
 use std::{fmt::Display, path::Path};
 
@@ -17,7 +17,7 @@ pub struct Btor {
     pub bad: Vec<Term>,
     pub output: Vec<Term>,
     pub constraint: Vec<Term>,
-    pub symbols: GHashMap<Term, Vec<String>>,
+    pub symbols: TermSymbol,
     pub prop_label: Vec<String>,
 }
 
