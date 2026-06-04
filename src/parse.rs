@@ -60,11 +60,8 @@ impl Parser {
         if symbol.starts_with(';') {
             return;
         }
-        let entry = self.symbols.entry(t.clone()).or_default();
         for symbol in symbol.split(',').filter(|symbol| !symbol.is_empty()) {
-            if !entry.iter().any(|existing| existing == symbol) {
-                entry.push(symbol.to_string());
-            }
+            self.symbols.add_symbol(t, symbol.to_string());
         }
     }
 
